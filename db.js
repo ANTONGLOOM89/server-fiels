@@ -6,3 +6,5 @@ const pool = new Pool({
   port: "5432",
   database: "cloud_fields"
 })
+
+module.exports = pool
