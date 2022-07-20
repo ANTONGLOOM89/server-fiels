@@ -64,6 +64,7 @@ class AuthController {
           }
           const token = jwt.sign({ id: person.id }, config.get('secretKey'), { expiresIn: "1h" })
           return res.json({
+              success: true,
               token,
               person: {
                 id: person.id,
