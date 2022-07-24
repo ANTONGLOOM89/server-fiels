@@ -27,12 +27,30 @@ class AuthController {
             }
 
             const hashPassword = await bcrypt.hash(password, 8)
+            const salt = bcrypt.genSaltSync(10)
+
             const newPerson = await db.query(`INSERT INTO person (email, password, diskSpace, usedSpace, avatar) values ($1, $2, $3, $4, $5) RETURNING *`, 
             [email, hashPassword, diskSpace, usedSpace, avatar])
 
+            const foundPerson = await db.query(`SELECT id, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
+            const person = foundPerson.rows[0]
+
+            const token = jwt.sign({
+                email: email
+            }, 'dev-jwt', { expiresIn: 60*60 })
+
             return res.status(200).send({
                 success: true,
-                message: "Пользователь создан" 
+                message: "Пользователь создан",
+                token: `Bearer ${token}`,
+                person: {
+                    id: person.id,
+                    email: person.email, 
+                    password: person.password,  
+                    diskSpace: person.diskSpace,
+                    usedSpace: person.usedSpace, 
+                    avatar: person.avatar
+                }
             }) 
 
         } catch (error) {
@@ -48,7 +66,6 @@ class AuthController {
         try {
           const foundPerson = await db.query(`SELECT id, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
           const person = foundPerson.rows[0]
-          console.log(person)
           if (!person) {
             return res.status(400).send({
                 success: false,
@@ -62,19 +79,23 @@ class AuthController {
                 message: 'Пароль не верен!'
             })
           }
-          const token = jwt.sign({ id: person.id }, config.get('secretKey'), { expiresIn: "1h" })
-          return res.json({
-              success: true,
-              token,
-              person: {
+          const token = jwt.sign({
+            email: person.email
+          }, 'dev-jwt', { expiresIn: 60*60 })
+
+          return res.status(200).send({
+            success: true,
+            token: `Bearer ${token}`,
+            person: {
                 id: person.id,
                 email: person.email, 
                 password: person.password,  
                 diskSpace: person.diskSpace,
                 usedSpace: person.usedSpace, 
                 avatar: person.avatar
-              }
-          })
+            }
+          }) 
+
         } catch(error) {
             return res.status(403).send({
                 message: 'Извините, но произошла ошибка!',

@@ -1,4 +1,4 @@
 {
-  "serverPort": 7000,
+  "serverPort": 3000,
   "secretKey": "cloud_fields"
 }
