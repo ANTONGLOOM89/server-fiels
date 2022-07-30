@@ -6,11 +6,11 @@ const config = require('config')
 
 
 class AuthController {
-    async register( { body: { email, password, diskSpace, usedSpace, avatar } }, res) {
-        
+    async register( { body: { name, email, password, diskSpace, usedSpace, avatar } }, res) {
+
         try {
             
-            const errors = validationResult( { email, password, diskSpace, usedSpace, avatar } )
+            const errors = validationResult( { name, email, password, diskSpace, usedSpace, avatar } )
             if(!errors.isEmpty()) {
                 return res.status(400).send({
                     success: false,
@@ -29,10 +29,10 @@ class AuthController {
             const hashPassword = await bcrypt.hash(password, 8)
             const salt = bcrypt.genSaltSync(10)
 
-            const newPerson = await db.query(`INSERT INTO person (email, password, diskSpace, usedSpace, avatar) values ($1, $2, $3, $4, $5) RETURNING *`, 
-            [email, hashPassword, diskSpace, usedSpace, avatar])
+            const newPerson = await db.query(`INSERT INTO person (name, email, password, diskSpace, usedSpace, avatar) values ($1, $2, $3, $4, $5, $6) RETURNING *`, 
+            [name, email, hashPassword, diskSpace, usedSpace, avatar])
 
-            const foundPerson = await db.query(`SELECT id, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
+            const foundPerson = await db.query(`SELECT id, name, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
             const person = foundPerson.rows[0]
 
             const token = jwt.sign({
@@ -45,6 +45,7 @@ class AuthController {
                 token: `Bearer ${token}`,
                 person: {
                     id: person.id,
+                    name: person.name,
                     email: person.email, 
                     password: person.password,  
                     diskSpace: person.diskSpace,
@@ -64,21 +65,22 @@ class AuthController {
 
     async login ({ body: {email, password} }, res) {
         try {
-          const foundPerson = await db.query(`SELECT id, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
+          const foundPerson = await db.query(`SELECT id, name, email, password, diskSpace, usedSpace, avatar FROM person WHERE email = $1`, [email])
           const person = foundPerson.rows[0]
           if (!person) {
-            return res.status(400).send({
+            return res.status(200).send({
                 success: false,
                 message: 'Данный пользователь не найден!'
             })
           }
           const isPassValid = bcrypt.compareSync(password, person.password)
           if (!isPassValid) {
-            return res.status(400).send({
+            return res.status(200).send({
                 success: false,
                 message: 'Пароль не верен!'
             })
           }
+          
           const token = jwt.sign({
             email: person.email
           }, 'dev-jwt', { expiresIn: 60*60 })
@@ -88,6 +90,7 @@ class AuthController {
             token: `Bearer ${token}`,
             person: {
                 id: person.id,
+                name: person.name,
                 email: person.email, 
                 password: person.password,  
                 diskSpace: person.diskSpace,
