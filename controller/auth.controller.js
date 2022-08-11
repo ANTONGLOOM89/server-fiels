@@ -3,6 +3,7 @@ const db = require('../db')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
 const config = require('config')
+const fileService = require('../services/fileService')
 
 
 class AuthController {
@@ -39,6 +40,10 @@ class AuthController {
                 email: email
             }, 'dev-jwt', { expiresIn: 60*60 })
 
+            const file = await db.query(`INSERT INTO file (user_id, path) values ($1, $2) RETURNING *`, [person.id, ''])
+            await fileService.createDir(file.rows[0])
+
+
             return res.status(200).send({
                 success: true,
                 message: "Пользователь создан",
@@ -52,7 +57,7 @@ class AuthController {
                     usedSpace: person.usedSpace, 
                     avatar: person.avatar
                 }
-            }) 
+            })
 
         } catch (error) {
             return res.status(403).send({

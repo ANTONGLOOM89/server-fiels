@@ -7,3 +7,16 @@ create Table person(
     usedSpace INTEGER,
     avatar VARCHAR(255)
 );
+
+create Table file(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    type VARCHAR(255),
+    access_link VARCHAR(255),
+    size INTEGER,
+    path VARCHAR(255),
+    user_id INTEGER,
+    parent_id INTEGER,
+    childs_id INTEGER[],
+    FOREIGN KEY (user_id) REFERENCES person (id)
+);

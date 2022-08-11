@@ -1,4 +1,5 @@
 {
-  "serverPort": 7000,
-  "secretKey": "cloud_fields"
+  "serverPort": 3000,
+  "secretKey": "cloud_fields",
+  "filePath": "/home/anton/Документы/portfolio/project-files/server-fiels/files"
 }
