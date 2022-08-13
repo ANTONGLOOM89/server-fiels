@@ -40,8 +40,8 @@ class AuthController {
                 email: email
             }, 'dev-jwt', { expiresIn: 60*60 })
 
-            const file = await db.query(`INSERT INTO file (user_id, path) values ($1, $2) RETURNING *`, [person.id, ''])
-            await fileService.createDir(file.rows[0])
+            //const file = await db.query(`INSERT INTO file (user_id, path) values ($1, $2) RETURNING *`, [person.id, ''])
+            await fileService.createDir({ user_id:person.id, path: '' })
 
 
             return res.status(200).send({
