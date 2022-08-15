@@ -15,6 +15,7 @@ create Table file(
     access_link VARCHAR(255),
     size INTEGER,
     path VARCHAR(255),
+    date_create varchar(10) default to_char(CURRENT_DATE, 'DD.MM.YYYY'),
     user_id INTEGER,
     parent_id INTEGER,
     childs_id INTEGER[],

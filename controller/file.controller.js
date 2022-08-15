@@ -3,7 +3,6 @@ const db = require('../db')
 
 class FileController {
   async createDir(req, res) {
-    console.log('dvdvdvdvdvd!!!!!!!!!!!!!!!!1')
     try {
       const { name, type, parent_id, user_id } = req.body
       console.log(name, type, parent_id, user_id)
